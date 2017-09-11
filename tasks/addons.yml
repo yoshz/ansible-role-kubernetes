@@ -1,0 +1,29 @@
+- name: Ensure flannel configuration
+  template:
+    src: addons/flannel.j2
+    dest: /etc/kubernetes/addons/flannel.yaml
+  register: flannel
+
+- name: Installing flannel
+  command: kubectl apply -f /etc/kubernetes/addons/flannel.yaml
+  when: flannel|changed
+
+- name: Ensure kube-dns configuration
+  template:
+    src: addons/kube-dns.j2
+    dest: /etc/kubernetes/addons/kube-dns.yaml
+  register: kubedns
+
+- name: Installing kube-dns
+  command: kubectl apply -f /etc/kubernetes/addons/kube-dns.yaml
+  when: kubedns|changed
+
+- name: Ensure kube-proxy configuration
+  template:
+    src: addons/kube-proxy.j2
+    dest: /etc/kubernetes/addons/kube-proxy.yaml
+  register: kubeproxy
+
+- name: Installing kube-proxy
+  command: kubectl apply -f /etc/kubernetes/addons/kube-proxy.yaml
+  when: kubeproxy|changed

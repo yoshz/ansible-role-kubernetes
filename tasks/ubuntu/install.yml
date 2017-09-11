@@ -1,0 +1,11 @@
+- name: Install google apt key
+  apt_key: url=https://packages.cloud.google.com/apt/doc/apt-key.gpg state=present
+
+- name: Install kubernetes apt repository
+  apt_repository: repo="deb http://apt.kubernetes.io/ kubernetes-{{ ansible_distribution_release }} main" update_cache=yes state=present
+
+- name: Install kubeadm
+  apt: name=kubeadm={{ k8s_version }}-00 state=present
+
+- name: Install kubelet
+  apt: name=kubelet={{ k8s_version }}-00 state=present

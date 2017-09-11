@@ -1,0 +1,5 @@
+- name: Restart kubelet
+  service: name=kubelet state=restarted
+
+- name: Reload systemd daemon
+  systemd: name=kubelet state=restarted daemon_reload=yes

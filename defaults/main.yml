@@ -1,0 +1,12 @@
+k8s_version: 1.7.5
+k8s_group_name: k8s-master
+k8s_network_iface: eth0
+k8s_pki_dir: ../../pki
+
+k8s_apiserver_public_ip: "{{ ansible_default_ipv4['address'] }}"
+k8s_apiserver_public_dns: example.com
+k8s_apiserver_service_ip: 10.96.0.1
+k8s_dns_ip: 10.96.0.10
+k8s_service_subnet: 10.96.0.0/12
+k8s_pod_subnet: 10.244.0.0/16
+

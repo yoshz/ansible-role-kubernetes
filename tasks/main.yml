@@ -1,0 +1,17 @@
+- name: Create directories
+  file:
+    state: directory
+    path: "{{ item }}"
+    owner: root
+    group: root
+    mode: 0755
+  with_items:
+  - /etc/kubernetes
+  - /etc/kubernetes/addons
+  - /etc/kubernetes/manifests
+  - /etc/kubernetes/pki
+
+#- include: "{{ ansible_distribution|lower }}/install.yml"
+#- include: pki.yml
+#- include: configure.yml
+- include: addons.yml

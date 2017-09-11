@@ -1,0 +1,46 @@
+- name: Create manifests
+  template:
+    src: "manifests/{{ item }}.j2"
+    dest: "/etc/kubernetes/manifests/{{ item }}.yaml"
+    owner: root
+    group: root
+    mode: 0600
+  with_items:
+  - kube-apiserver
+  - kube-controller-manager
+  - kube-scheduler
+
+- name: Create kubleet systemd directory
+  file:
+    state: directory
+    path: /etc/systemd/system/kubelet.service.d
+    recurse: yes
+
+- name: Remove kubelet kubeadm systemd file
+  file:
+    state: absent
+    dest: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+  notify: [Reload systemd daemon]
+
+- name: Configure kubelet options
+  template:
+    src: systemd/kubelet.j2
+    dest: /etc/systemd/system/kubelet.service.d/10-kubelet-opts.conf
+    owner: root
+    group: root
+    mode: 0640
+  notify: [Reload systemd daemon, Restart kubelet]
+
+- name: Create kube home directory
+  file:
+    state: directory
+    path: /root/.kube
+
+- name: Create default kube config file
+  file:
+    state: link
+    src: /etc/kubernetes/admin.conf
+    path: /root/.kube/config
+
+- name: Ensure kubelet is started at boot
+  service: name=kubelet state=started enabled=yes

@@ -1,0 +1,5 @@
+k8s_etcd_servers: |
+  {% for host in groups[k8s_group_name] -%}
+  https://{{ hostvars[host]['ansible_' + k8s_network_iface]['ipv4']['address'] }}:2379{%- if not loop.last %},{% endif -%}
+  {%- endfor -%}
+k8s_advertise_ip: "{{ hostvars[inventory_hostname]['ansible_' + k8s_network_iface]['ipv4']['address'] }}"
