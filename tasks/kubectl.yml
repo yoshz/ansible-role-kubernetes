@@ -1,0 +1,20 @@
+---
+- name: Download kubectl
+  get_url:
+    url: "https://storage.googleapis.com/kubernetes-release/release/v{{ k8s_version }}/bin/linux/amd64/kubectl"
+    checksum: "{{ k8s_kubectl_checksum }}"
+    dest: /usr/local/bin/kubectl
+    mode: 0755
+
+- name: Create /root/.kube
+  file:
+    state: directory
+    path: /root/.kube
+
+- name: Create kubeconfig
+  template:
+    src: kubeconfig.j2
+    dest: /root/.kube/config
+  vars:
+    cert: admin
+    user: admin

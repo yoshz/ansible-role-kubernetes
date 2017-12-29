@@ -1,0 +1,64 @@
+---
+- name: Create etcd directories
+  file:
+    state: directory
+    path: "{{ item }}"
+  with_items:
+  - /etc/etcd
+  - /var/lib/etcd
+
+- name: Check for installation of etcd
+  stat:
+    path: /usr/local/bin/etcd
+  register: etcd_binary
+
+- when: not etcd_binary.stat.exists
+  block:
+    - name: Download etcd
+      get_url:
+        url: "https://github.com/coreos/etcd/releases/download/v{{ etcd_version }}/etcd-v{{ etcd_version }}-linux-amd64.tar.gz"
+        dest: /tmp/etcd-v{{ etcd_version }}-linux-amd64.tgz
+        mode: 0644
+    - name: Unachive etcd
+      unarchive:
+        remote_src: yes
+        src: /tmp/etcd-v{{ etcd_version }}-linux-amd64.tgz
+        dest: /tmp
+        creates: /tmp/etcd-v{{ etcd_version }}-linux-amd64
+    - name: Copy etcd
+      copy:
+        remote_src: yes
+        src: /tmp/etcd-v{{ etcd_version }}-linux-amd64/etcd
+        dest: /usr/local/bin/etcd
+        mode: 0755
+    - name: Copy etcdctl
+      copy:
+        remote_src: yes
+        src: /tmp/etcd-v{{ etcd_version }}-linux-amd64/etcdctl
+        dest: /usr/local/bin/etcdctl
+        mode: 0755
+  always:
+    - name: Delete archive
+      file:
+        path: /tmp/etcd-v{{ etcd_version }}-linux-amd64.tgz
+        state: absent
+    - name: Delete extracted archive
+      file:
+        path: /tmp/etcd-v{{ etcd_version }}-linux-amd64
+        state: absent
+
+- name: Install etcd systemd configuration
+  template:
+    src: systemd/etcd.j2
+    dest: /etc/systemd/system/etcd.service
+    owner: root
+    group: root
+    mode: 0664
+  notify: Restart etcd
+
+- name: Open etcd ports
+  ufw: rule=allow port=2379,2380 proto=tcp src={{ hostvars[item]['ansible_' + k8s_network_iface]['ipv4']['address'] }}
+  with_items: "{{ groups['etcd'] }}"
+
+- name: Ensure etcd is started at boot
+  service: name=etcd daemon_reload=yes state=started enabled=yes

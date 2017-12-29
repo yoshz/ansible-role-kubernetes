@@ -1,0 +1,43 @@
+---
+- name: Download kube-proxy
+  get_url:
+    url: "https://storage.googleapis.com/kubernetes-release/release/v{{ k8s_version }}/bin/linux/amd64/kube-proxy"
+    checksum: "{{ k8s_kubeproxy_checksum }}"
+    dest: /usr/local/bin/kube-proxy
+    mode: 0755
+
+- name: Install kube-proxy systemd configuration
+  template:
+    src: systemd/kube-proxy.j2
+    dest: /etc/systemd/system/kube-proxy.service
+    owner: root
+    group: root
+    mode: 0664
+  notify:
+  - Reload systemd daemon
+  - Restart kube-proxy
+
+- name: Create /var/lib/kube-proxy
+  file:
+    state: directory
+    path: /var/lib/kube-proxy
+
+- name: Create kubeconfig
+  template:
+    src: kubeconfig.j2
+    dest: /var/lib/kube-proxy/kubeconfig
+  vars:
+    cert: kube-proxy
+    user: system:kube-proxy
+  notify:
+  - Restart kube-proxy
+
+- name: Install conntrack
+  apt: name=conntrack
+
+- name: Allow traffic to external services
+  ufw: rule=allow port=30000-32767 proto=tcp src={{ hostvars[item]['ansible_' + k8s_network_iface]['ipv4']['address'] }}
+  with_items: "{{ groups['k8s-master'] }}"
+
+- name: Ensure kube-proxy is started at boot
+  service: name=kube-proxy daemon_reload=yes state=started enabled=yes

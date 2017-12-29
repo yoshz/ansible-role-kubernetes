@@ -1,0 +1,36 @@
+---
+- name: Download kube-controller-manager
+  get_url:
+    url: "https://storage.googleapis.com/kubernetes-release/release/v{{ k8s_version }}/bin/linux/amd64/kube-controller-manager"
+    checksum: "{{ k8s_kubecontrollermanager_checksum }}"
+    dest: /usr/local/bin/kube-controller-manager
+    mode: 0755
+
+- name: Install kube-controller-manager systemd configuration
+  template:
+    src: systemd/kube-controller-manager.j2
+    dest: /etc/systemd/system/kube-controller-manager.service
+    owner: root
+    group: root
+    mode: 0664
+  notify:
+  - Reload systemd daemon
+  - Restart kube-controller-manager
+
+- name: Create /var/lib/kube-controller-manager
+  file:
+    state: directory
+    path: /var/lib/kube-controller-manager
+
+- name: Create kubeconfig
+  template:
+    src: kubeconfig.j2
+    dest: /var/lib/kube-controller-manager/kubeconfig
+  vars:
+    cert: controller-manager
+    user: system:kube-controller-manager
+  notify:
+  - Restart kube-controller-manager
+
+- name: Ensure kube-controller-manager is started at boot
+  service: name=kube-controller-manager daemon_reload=yes state=started enabled=yes

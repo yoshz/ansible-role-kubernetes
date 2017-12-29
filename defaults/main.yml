@@ -1,12 +1,18 @@
-k8s_version: 1.7.5
-k8s_group_name: k8s-master
+k8s_version: 1.9.0
+k8s_kubectl_checksum: sha256:9150691c3c9d0c3d6c0c570a81221f476e107994b35e33c193b1b90b7b7c0cb5
+k8s_kubeapiserver_checksum: sha256:fd64d8689ad7af76b7c9e2a7130f2750f51382d5d1174b7b902e83c22586ada8
+k8s_kubecontrollermanager_checksum: sha256:069e27a33c32e30d3c51765a179148f4691a5a283939f70f0f7c976724d77847
+k8s_kubescheduler_checksum: sha256:36d6bd43eecf01ab34ddf2fde50444cbd145e3c372ba769a07715fe125a6dc67
+k8s_kubeproxy_checksum: sha256:67892bd43164c3a4c6a37ef20b6b88ba1a6ea8e207f1b0933144ea40c5e2f7a0
+k8s_kubelet_checksum: sha256:d9bc52cbab246c770e2bc054801280a2a754bfc0acec4494c12c4b98c941cdf6
+
 k8s_network_iface: eth0
-k8s_pki_dir: ../../pki
+k8s_certs_dst: /etc/kubernetes/certs
 
 k8s_apiserver_public_ip: "{{ ansible_default_ipv4['address'] }}"
-k8s_apiserver_public_dns: example.com
 k8s_apiserver_service_ip: 10.96.0.1
 k8s_dns_ip: 10.96.0.10
 k8s_service_subnet: 10.96.0.0/12
 k8s_pod_subnet: 10.244.0.0/16
 
+etcd_version: 3.2.11

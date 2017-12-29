@@ -1,0 +1,27 @@
+---
+- name: Create certs directory
+  file:
+    state: directory
+    path: "{{ k8s_certs_dst }}"
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Install CA certificate
+  copy:
+    src: "{{ k8s_certs_src }}/{{ item }}"
+    dest: "{{ k8s_certs_dst }}/{{ item }}"
+    mode: 0600
+  with_items:
+  - ca.crt
+
+- name: Install master certificates
+  copy:
+    src: "{{ k8s_certs_src }}/{{ item }}"
+    dest: "{{ k8s_certs_dst }}/{{ item }}"
+    mode: 0600
+  with_items:
+  - ca.key
+  - server.crt
+  - server.key
+  when: "'k8s-master' in groups"

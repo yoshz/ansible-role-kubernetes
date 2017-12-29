@@ -1,0 +1,21 @@
+---
+- name: Check if dashboard is running
+  command: kubectl --namespace=kube-system get deployment dashboard
+  run_once: yes
+  ignore_errors: yes
+  register: dashboard_installed
+
+- when: dashboard_installed.rc > 0
+  run_once: yes
+  block:
+  - name: Ensure dashboard configuration
+    template:
+      src: addons/dashboard.j2
+      dest: /tmp/dashboard.yml
+  - name: Apply dashboard manifest
+    shell: kubectl apply -f /tmp/dashboard.yml
+  always:
+  - name: Remove dashboard manifest
+    file:
+      state: absent
+      path: /tmp/dashboard.yml

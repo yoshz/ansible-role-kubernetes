@@ -1,0 +1,52 @@
+---
+- name: Download kubelet
+  get_url:
+    url: "https://storage.googleapis.com/kubernetes-release/release/v{{ k8s_version }}/bin/linux/amd64/kubelet"
+    checksum: "{{ k8s_kubelet_checksum }}"
+    dest: /usr/local/bin/kubelet
+    mode: 0755
+
+- name: Install kubelet systemd configuration
+  template:
+    src: systemd/kubelet.j2
+    dest: /etc/systemd/system/kubelet.service
+    owner: root
+    group: root
+    mode: 0664
+  notify:
+  - Reload systemd daemon
+  - Restart kubelet
+
+- name: Create /var/lib/kubelet
+  file:
+    state: directory
+    path: /var/lib/kubelet
+
+- name: Create kubeconfig
+  template:
+    src: kubeconfig.j2
+    dest: /var/lib/kubelet/kubeconfig
+  vars:
+    cert: "{{ inventory_hostname }}"
+    user: "system:node:{{ inventory_hostname }}"
+  notify:
+  - Restart kubelet
+
+- name: Install kubelet certificate
+  copy:
+    src: "{{ k8s_certs_src }}/{{ inventory_hostname }}.crt"
+    dest: "/var/lib/kubelet/pki/kubelet.crt"
+    mode: 0644
+
+- name: Install kubelet privatey key
+  copy:
+    src: "{{ k8s_certs_src }}/{{ inventory_hostname }}.key"
+    dest: "/var/lib/kubelet/pki/kubelet.key"
+    mode: 0600
+
+- name: Allow kubelet traffic internally
+  ufw: rule=allow port=10250 proto=tcp src={{ hostvars[item]['ansible_' + k8s_network_iface]['ipv4']['address'] }}
+  with_items: "{{ groups['k8s-master'] }}"
+
+- name: Ensure kubelet is started at boot
+  service: name=kubelet daemon_reload=yes state=started enabled=yes

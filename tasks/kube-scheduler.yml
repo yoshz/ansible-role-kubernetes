@@ -1,0 +1,36 @@
+---
+- name: Download kube-scheduler
+  get_url:
+    url: "https://storage.googleapis.com/kubernetes-release/release/v{{ k8s_version }}/bin/linux/amd64/kube-scheduler"
+    checksum: "{{ k8s_kubescheduler_checksum }}"
+    dest: /usr/local/bin/kube-scheduler
+    mode: 0755
+
+- name: Install kube-scheduler systemd configuration
+  template:
+    src: systemd/kube-scheduler.j2
+    dest: /etc/systemd/system/kube-scheduler.service
+    owner: root
+    group: root
+    mode: 0664
+  notify:
+  - Reload systemd daemon
+  - Restart kube-scheduler
+
+- name: Create /var/lib/kube-scheduler
+  file:
+    state: directory
+    path: /var/lib/kube-scheduler
+
+- name: Create kubeconfig
+  template:
+    src: kubeconfig.j2
+    dest: /var/lib/kube-scheduler/kubeconfig
+  vars:
+    cert: scheduler
+    user: system:kube-scheduler
+  notify:
+  - Restart kube-scheduler
+
+- name: Ensure kube-scheduler is started at boot
+  service: name=kube-scheduler daemon_reload=yes state=started enabled=yes

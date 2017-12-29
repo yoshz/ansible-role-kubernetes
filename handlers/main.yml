@@ -1,5 +1,20 @@
+- name: Reload systemd daemon
+  systemd: daemon_reload=yes
+
+- name: Restart etcd
+  service: name=etcd state=restarted
+
+- name: Restart kube-apiserver
+  service: name=kube-apiserver state=restarted
+
+- name: Restart kube-controller-manager
+  service: name=kube-controller-manager state=restarted
+
+- name: Restart kube-scheduler
+  service: name=kube-scheduler state=restarted
+
+- name: Restart kube-proxy
+  service: name=kube-proxy state=restarted
+
 - name: Restart kubelet
   service: name=kubelet state=restarted
-
-- name: Reload systemd daemon
-  systemd: name=kubelet state=restarted daemon_reload=yes

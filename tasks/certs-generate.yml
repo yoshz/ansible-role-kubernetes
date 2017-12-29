@@ -1,0 +1,70 @@
+---
+- name: Create certs directory
+  file:
+    state: directory
+    path: "{{ k8s_certs_src }}"
+
+- name: Generate CA private key
+  openssl_privatekey:
+    path: "{{ k8s_certs_src }}/ca.key"
+
+- name: Generate CA certificate
+  shell: openssl req -x509 -new -nodes -key ca.key -days 3650 -out ca.crt -subj "/CN=k8s-ca"
+  args:
+    chdir: "{{ k8s_certs_src }}"
+    creates: "ca.crt"
+
+- name: Generate server key
+  openssl_privatekey:
+    path: "{{ k8s_certs_src }}/server.key"
+
+- name: Create server config file
+  template:
+    src: openssl/server.j2
+    dest: "{{ k8s_certs_src }}/server.conf"
+  register: openssl_server
+
+- name: Generate server certificate
+  shell: |
+    set -e;
+    openssl req -new -key server.key -out server.csr -subj "/CN=kubernetes" -config server.conf;
+    openssl x509 -req -in server.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out server.crt -days 3650 -extensions v3_req -extfile server.conf;
+    rm -f server.csr;
+  args:
+    chdir: "{{ k8s_certs_src }}"
+  when: openssl_server|changed
+
+- name: Generate client certificates
+  shell: |
+    set -e;
+    openssl genrsa -out {{ item.name }}.key 2048;
+    openssl req -new -key {{ item.name }}.key -out {{ item.name }}.csr -subj "/CN={{ item.user }}{% if item.organisation is defined %}/O={{ item.organisation }}{% endif %}";
+    openssl x509 -req -in {{ item.name }}.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out {{ item.name }}.crt -days 3650 -extensions v3_req;
+    rm -f {{ item.name }}.csr;
+  args:
+    chdir: "{{ k8s_certs_src }}"
+    creates: "{{ item.name }}.crt"
+  with_items:
+  - {name: admin, user: "admin", organisation: "system:masters"}
+  - {name: kube-proxy, user: "system:kube-proxy"}
+  - {name: scheduler, user: "system:kube-scheduler"}
+  - {name: controller-manager, user: "system:kube-controller-manager"}
+
+- name: Create node config file
+  template:
+    src: openssl/node.j2
+    dest: "{{ k8s_certs_src }}/node.conf"
+
+- name: Generate node certificates
+  shell: |
+    set -e;
+    export NODE_NAME={{ item }}
+    export NODE_IP={{ hostvars[item]['ansible_' + k8s_network_iface]['ipv4']['address'] }}
+    openssl genrsa -out {{ item }}.key 2048;
+    openssl req -new -key {{ item }}.key -out {{ item }}.csr -subj "/CN=system:node:{{ item }}/O=system:nodes" -config node.conf;
+    openssl x509 -req -in {{ item }}.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out {{ item }}.crt -days 3650 -extensions v3_req -extfile node.conf;
+    rm -f {{ item }}.csr;
+  args:
+    chdir: "{{ k8s_certs_src }}"
+    creates: "{{ item }}.crt"
+  with_items: "{{ groups['k8s-node'] }}"

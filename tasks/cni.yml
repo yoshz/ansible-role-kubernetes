@@ -1,0 +1,11 @@
+---
+- name: Create CNI configuration directory
+  file:
+    state: directory
+    path: /etc/cni/net.d/
+    recurse: yes
+
+- name: Install CNI configuration file
+  template:
+    src: cni.j2
+    dest: /etc/cni/net.d/10-flannel.conflist

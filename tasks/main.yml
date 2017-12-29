@@ -1,17 +1,45 @@
-- name: Create directories
-  file:
-    state: directory
-    path: "{{ item }}"
-    owner: root
-    group: root
-    mode: 0755
-  with_items:
-  - /etc/kubernetes
-  - /etc/kubernetes/addons
-  - /etc/kubernetes/manifests
-  - /etc/kubernetes/pki
+---
+- import_tasks: kubectl.yml
+  tags: kubectl
 
-#- include: "{{ ansible_distribution|lower }}/install.yml"
-#- include: pki.yml
-#- include: configure.yml
-- include: addons.yml
+- import_tasks: certs-generate.yml
+  connection: local
+  run_once: yes
+  tags: [certs, certs-generate]
+
+- import_tasks: certs-install.yml
+  tags: [certs, certs-install]
+
+- import_tasks: etcd.yml
+  when: "'etcd' in groups"
+  tags: etcd
+
+- import_tasks: kube-apiserver.yml
+  when: "'k8s-master' in groups"
+  tags: kube-apiserver
+
+- import_tasks: kube-controller-manager.yml
+  when: "'k8s-master' in groups"
+  tags: kube-controller-manager
+
+- import_tasks: kube-scheduler.yml
+  when: "'k8s-master' in groups"
+  tags: kube-scheduler
+
+- import_tasks: kube-proxy.yml
+  tags: kube-proxy
+
+- import_tasks: cni.yml
+  tags: cni
+
+- import_tasks: kubelet.yml
+  tags: kubelet
+
+- import_tasks: flannel.yml
+  tags: flannel
+
+- import_tasks: kube-dns.yml
+  tags: kube-dns
+
+- import_tasks: dashboard.yml
+  tags: dashboard

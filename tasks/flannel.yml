@@ -1,0 +1,25 @@
+---
+- name: Check if flannel is running
+  command: kubectl --namespace=kube-system get daemonset kube-flannel-ds
+  run_once: yes
+  ignore_errors: yes
+  register: flannel_installed
+
+- when: flannel_installed.rc > 0
+  run_once: yes
+  block:
+  - name: Ensure flannel configuration
+    template:
+      src: addons/flannel.j2
+      dest: /tmp/flannel.yml
+  - name: Apply flannel manifest
+    shell: kubectl apply -f /tmp/flannel.yml
+  always:
+  - name: Remove flannel manifest
+    file:
+      state: absent
+      path: /tmp/flannel.yml
+
+- name: Allow flannel traffic internally
+  ufw: rule=allow port=8285,8472 proto=udp src={{ hostvars[item]['ansible_' + k8s_network_iface]['ipv4']['address'] }}
+  with_items: "{{ groups['k8s-master'] }}"

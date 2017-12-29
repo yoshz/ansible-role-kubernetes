@@ -1,0 +1,35 @@
+[Unit]
+Description=Kubernetes API Server
+Documentation=https://github.com/kubernetes/kubernetes
+
+[Service]
+ExecStart=/usr/local/bin/kube-apiserver \
+    --admission-control=Initializers,NamespaceLifecycle,LimitRanger,ServiceAccount,PersistentVolumeLabel,DefaultStorageClass,DefaultTolerationSeconds,NodeRestriction,ResourceQuota \
+    --advertise-address={{ hostvars[inventory_hostname]['ansible_' + k8s_network_iface]['ipv4']['address'] }} \
+    --allow-privileged=true \
+    --apiserver-count={{ groups['k8s-master']|count }} \
+    --authorization-mode=Node,RBAC \
+    --bind-address=0.0.0.0 \
+    --client-ca-file={{ k8s_certs_dst }}/ca.crt \
+    --etcd-cafile={{ k8s_certs_dst }}/ca.crt \
+    --etcd-certfile={{ k8s_certs_dst }}/server.crt \
+    --etcd-keyfile={{ k8s_certs_dst }}/server.key \
+    --etcd-servers={{ k8s_etcd_servers }} \
+    --kubelet-certificate-authority={{ k8s_certs_dst }}/ca.crt \
+    --kubelet-client-certificate={{ k8s_certs_dst }}/server.crt \
+    --kubelet-client-key={{ k8s_certs_dst }}/server.key \
+    --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname \
+    --kubelet-https=true \
+    --runtime-config=api/all \
+    --service-account-key-file={{ k8s_certs_dst }}/server.key \
+    --service-cluster-ip-range={{ k8s_service_subnet }} \
+    --secure-port=6443 \
+    --tls-ca-file={{ k8s_certs_dst }}/ca.crt \
+    --tls-cert-file={{ k8s_certs_dst }}/server.crt \
+    --tls-private-key-file={{ k8s_certs_dst }}/server.key \
+    --v=1
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
