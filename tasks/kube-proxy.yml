@@ -36,8 +36,11 @@
   apt: name=conntrack
 
 - name: Allow traffic to external services
-  ufw: rule=allow port=30000-32767 proto=tcp src={{ hostvars[item]['ansible_' + k8s_network_iface]['ipv4']['address'] }}
+  ufw: rule=allow port=30000:32767 proto=tcp src={{ hostvars[item]['ansible_' + k8s_network_iface]['ipv4']['address'] }}
   with_items: "{{ groups['k8s-master'] }}"
+
+- name: Allow all traffic from pods
+  ufw: rule=allow src={{ k8s_pod_subnet }}
 
 - name: Ensure kube-proxy is started at boot
   service: name=kube-proxy daemon_reload=yes state=started enabled=yes
