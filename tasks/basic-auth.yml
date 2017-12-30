@@ -16,7 +16,7 @@
       path: "/tmp/auth"
       name: "{{ item.name }}"
       password: "{{ item.password }}"
-    with_items: "{{ k8s_users }}"
+    with_items: "{{ k8s_basic_auth_users }}"
   - name: Create basic-auth secret
     command: kubectl create secret generic basic-auth --from-file=/tmp/auth --namespace=kube-system
   always:

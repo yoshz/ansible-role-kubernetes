@@ -91,7 +91,14 @@ Create a playbook with the following content:
   roles:
   - role: yoshz.kubernetes
     k8s_version: 1.9.0
+    # Local location to store generated certificates 
     k8s_certs_src: ../certs
+    # Public DNS used as suffix for ingress rules
+    k8s_public_dns: example.org
+    # Users that can access the dashboards 
+    k8s_basic_auth_users:
+    - name: admin
+      password: admin
 ```
 
 Docker
