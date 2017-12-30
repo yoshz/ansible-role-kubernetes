@@ -1,0 +1,16 @@
+---
+- name: Check if heapster is running
+  command: kubectl --namespace=kube-system get deployment heapster
+  run_once: yes
+  ignore_errors: yes
+  register: heapster_installed
+
+- name: Install heapster deployment
+  shell: kubectl apply -f https://raw.githubusercontent.com/kubernetes/heapster/master/deploy/kube-config/standalone/heapster-controller.yaml
+  run_once: yes
+  when: heapster_installed.rc > 0
+
+- name: Install heapster cluster role
+  shell: kubectl apply -f https://raw.githubusercontent.com/kubernetes/heapster/master/deploy/kube-config/rbac/heapster-rbac.yaml
+  run_once: yes
+  when: heapster_installed.rc > 0

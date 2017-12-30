@@ -27,12 +27,15 @@
   tags: kube-scheduler
 
 - import_tasks: kube-proxy.yml
+  when: "'k8s-node' in groups"
   tags: kube-proxy
 
 - import_tasks: cni.yml
+  when: "'k8s-node' in groups"
   tags: cni
 
 - import_tasks: kubelet.yml
+  when: "'k8s-node' in groups"
   tags: kubelet
 
 - import_tasks: flannel.yml
@@ -40,6 +43,9 @@
 
 - import_tasks: kube-dns.yml
   tags: kube-dns
+
+- import_tasks: heapster.yml
+  tags: heapster
 
 - import_tasks: dashboard.yml
   tags: dashboard
