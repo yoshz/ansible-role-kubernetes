@@ -1,0 +1,21 @@
+---
+- run_once: yes
+  block:
+  - name: Create traefik manifest
+    template:
+      src: addons/traefik.j2
+      dest: /tmp/traefik.yml
+  - name: Apply traefik manifest
+    shell: kubectl apply -f /tmp/traefik.yml
+  always:
+  - name: Remove traefik manifest
+    file:
+      state: absent
+      path: /tmp/traefik.yml
+
+- name: Allow ingress traffic
+  ufw: rule=allow port=80 proto=tcp
+
+- name: Allow internal web-ui traffic
+  ufw: rule=allow port=8080 proto=tcp src={{ hostvars[item]['ansible_' + k8s_network_iface]['ipv4']['address'] }}
+  with_items: "{{ groups['k8s-node'] }}"
