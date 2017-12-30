@@ -15,6 +15,7 @@ ExecStart=/usr/local/bin/kube-apiserver \
     --etcd-certfile={{ k8s_certs_dst }}/server.crt \
     --etcd-keyfile={{ k8s_certs_dst }}/server.key \
     --etcd-servers={{ k8s_etcd_servers }} \
+    --insecure-port=0 \
     --kubelet-certificate-authority={{ k8s_certs_dst }}/ca.crt \
     --kubelet-client-certificate={{ k8s_certs_dst }}/server.crt \
     --kubelet-client-key={{ k8s_certs_dst }}/server.key \

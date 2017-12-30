@@ -13,7 +13,6 @@ ExecStart=/usr/local/bin/kube-controller-manager \
   --configure-cloud-routes=false \
   --kubeconfig=/var/lib/kube-controller-manager/kubeconfig \
   --leader-elect=true \
-  #--master=http://127.0.0.1:8080 \
   --root-ca-file={{ k8s_certs_dst }}/ca.crt \
   --service-account-private-key-file=/{{ k8s_certs_dst }}/server.key \
   --service-cluster-ip-range={{ k8s_service_subnet }} \
