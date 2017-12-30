@@ -38,14 +38,14 @@
     dest: "/var/lib/kubelet/pki/kubelet.crt"
     mode: 0644
 
-- name: Install kubelet privatey key
+- name: Install kubelet private key
   copy:
     src: "{{ k8s_certs_src }}/{{ inventory_hostname }}.key"
     dest: "/var/lib/kubelet/pki/kubelet.key"
     mode: 0600
 
 - name: Allow kubelet traffic internally
-  ufw: rule=allow port=10250 proto=tcp src={{ hostvars[item]['ansible_' + k8s_network_iface]['ipv4']['address'] }}
+  ufw: rule=allow port=10250,10255 proto=tcp src={{ hostvars[item]['ansible_' + k8s_network_iface]['ipv4']['address'] }}
   with_items: "{{ groups['k8s-master'] }}"
 
 - name: Ensure kubelet is started at boot
