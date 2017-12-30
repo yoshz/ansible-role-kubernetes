@@ -1,0 +1,26 @@
+---
+- name: Check for basic-auth secret
+  command: kubectl --namespace=kube-system get secret basic-auth
+  run_once: yes
+  ignore_errors: yes
+  register: auth_installed
+
+- run_once: yes
+  when: auth_installed.rc > 0
+  block:
+  - name: Install passlib
+    pip: name=passlib
+  - name: Generate basic-auth file
+    htpasswd:
+      create: yes
+      path: "/tmp/auth"
+      name: "{{ item.name }}"
+      password: "{{ item.password }}"
+    with_items: "{{ k8s_users }}"
+  - name: Create basic-auth secret
+    command: kubectl create secret generic basic-auth --from-file=/tmp/auth --namespace=kube-system
+  always:
+  - name: Delete basic-auth file
+    file:
+      state: absent
+      path: /tmp/auth

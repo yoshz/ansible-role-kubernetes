@@ -47,5 +47,8 @@
 - import_tasks: heapster.yml
   tags: heapster
 
+- import_tasks: basic-auth.yml
+  tags: basic-auth
+
 - import_tasks: dashboard.yml
   tags: dashboard

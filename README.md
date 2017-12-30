@@ -167,6 +167,10 @@ Installs kube-dns as Deployment.
 
 Installs heapster in standalone mode as Deployment.
 
+### basic-auth
+
+Installs basic-auth secret which is used for basic authentication for Dashboard and Traefik.
+
 ### dashboard
 
 Installs dashboard as Deployment.
