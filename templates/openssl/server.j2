@@ -12,9 +12,10 @@ DNS.0 = kubernetes
 DNS.1 = kubernetes.default
 DNS.2 = kubernetes.default.svc
 DNS.3 = kubernetes.default.svc.cluster.local
-IP.0 = {{ k8s_apiserver_service_ip }}
+IP.0 = 127.0.0.1
+IP.1 = {{ k8s_apiserver_service_ip }}
 {% for host in groups['k8s-master'] -%}
-IP.{{ loop.index }} = {{ hostvars[host]['ansible_' + k8s_network_iface]['ipv4']['address'] }}
+IP.{{ loop.index + 1 }} = {{ hostvars[host]['ansible_' + k8s_network_iface]['ipv4']['address'] }}
 DNS.{{ loop.index + 3 }} = {{ host }}
 {% endfor %}
 
