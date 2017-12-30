@@ -1,20 +1,24 @@
 yoshz.kubernetes
 ================
 
-This repository holds an Ansible role to install and configure Kubernetes.
+This Ansible role installs and configures Kubernetes on Ubuntu 16.04.
+With small modifications it is also possible to use this role in CentOS or other distributions.
+
 Installation steps are based on Kelsey Hightower's [Kubernetes The Hard Way](https://github.com/kelseyhightower/kubernetes-the-hard-way/)
-but includes extra steps for non GCE/AWS cloud solutions.
+but doesn't require GCE and adds missing functionality.
 
 The role is mainly created to learn how to install Kubernetes step by step.
 Its purpose is not to replace Kubeadm, Kubespray or any other tool.
 
 Kubernetes is installed and configured with the following choices. (See [Usage](#Usage) for the right installation order)
 
-- [X] Install `etcd`, `kube-apiserver`, `kube-controller-manager`, `kube-scheduler` as systemd service on each master node in high availabity mode. 
-- [X] Install `kube-proxy` and `kubelet` as systemd service on each worker node.
-- [X] Configure ufw rules to allow traffic between in each node
+- [X] Installs `etcd`, `kube-apiserver`, `kube-controller-manager`, `kube-scheduler` as systemd service on each master node in high availabity mode
+- [X] Installs `kube-proxy` and `kubelet` as systemd service on each worker node
+- [X] Configures ufw rules to allow traffic between in each node
 - [X] Installs `flannel` as network overlay
-- [X] Installs cluster add-ons: `kube-dns`, `heapster`, `dashboard`
+- [X] Installs cluster add-ons: `kube-dns`, `heapster` and `kubernetes-dashboard`
+- [X] Installs Traefik as ingress controller
+- [X] Configures default ingress rules with basic authentication
 
 Todo's
 ------
@@ -22,7 +26,6 @@ Todo's
 - [ ] Replace Docker with [cri-containerd](https://github.com/kubernetes-incubator/cri-containerd) runtime
 - [ ] Configure Webhook authentication for Kubelet
 - [ ] Configure VPN connection between each node
-- [ ] Install ingress controller
 
 Installation
 ============
@@ -127,60 +130,57 @@ And prepend the role to the playbook:
 Usage
 =====
 
-Each installation has a different tag which makes it possible to provision your nodes step by step.
+Each installation step has a different tag which makes it possible to provision your nodes step by step.
 
-### certs-generate
+To run a specific step:
+```bash
+ansible-playbook -i [inventory] [playbook] --tags [tag]
+``` 
 
+#### certs-generate
 Locally generates the private keys and certificates.
 These files will be saved in the `k8s_certs_src` directory.
 
-### certs-install
-
+#### certs-install
 Installs the private keys and certificates on each node.
 
-### etcd
-
+#### etcd
 Installs etcd on each master and initialise cluster.
 
-### kube-apiserver
-
+##### kube-apiserver
 Installs kube-apiserver on each master as systemd service.
 
-### kube-controller-manager
-
+#### kube-controller-manager
 Installs kube-controller-manager on each master as systemd service. 
 
-### kube-scheduler
-
+#### kube-scheduler
 Installs kube-scheduler on each master as systemd service.
 
-### cni
-
+#### cni
 Installs cni configuration file needed before starting Kubelet.
 
-### kubelet
-
+#### kubelet
 Installs kubelet as systemd service on each worker node.
 
-### flannel
-
+#### flannel
 Installs flannel as DaemonSet.
 
-### kube-dns
-
+#### kube-dns
 Installs kube-dns as Deployment.
 
-### heapster
-
+#### heapster
 Installs heapster in standalone mode as Deployment.
 
-### basic-auth
-
+#### basic-auth
 Installs basic-auth secret which is used for basic authentication for Dashboard and Traefik.
 
-### dashboard
+#### dashboard
+Installs dashboard as Deployment and adds an Ingress rule on:
+http://dashboard.<public_dns>/.
 
-Installs dashboard as Deployment.
+#### traefik
+Installs treafik as Ingress Controller and adds an Ingress rule to enable web-ui on http://traefik.<public_dns>/.
+
 
 License
 =======
@@ -190,4 +190,4 @@ MIT
 Author Information
 ==================
 
-Yosh de Vos <yosh@yoshz.nl>
+Yosh de Vos <yosh@elzorro.nl>
