@@ -18,7 +18,7 @@
   - Restart kube-apiserver
 
 - name: Allow apiserver traffic internally
-  ufw: rule=allow port=6443 proto=tcp src={{ hostvars[item]['ansible_' + k8s_network_iface]['ipv4']['address'] }}
+  ufw: rule=allow port=6443 proto=tcp src={{ k8s_internal_subnet }}
   with_items: "{{ groups['k8s-master'] }}"
 
 - name: Ensure kube-apiserver is started at boot
