@@ -36,8 +36,7 @@
   apt: name=conntrack
 
 - name: Allow traffic to external services
-  ufw: rule=allow port=30000:32767 proto=tcp src={{ hostvars[item]['ansible_' + k8s_network_iface]['ipv4']['address'] }}
-  with_items: "{{ groups['k8s-master'] }}"
+  ufw: rule=allow port=30000:32767 proto=tcp
 
 - name: Allow all traffic from pods
   ufw: rule=allow src={{ k8s_pod_subnet }}

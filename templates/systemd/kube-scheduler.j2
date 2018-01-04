@@ -4,8 +4,8 @@ Documentation=https://github.com/kubernetes/kubernetes
 
 [Service]
 ExecStart=/usr/local/bin/kube-scheduler \
-  --leader-elect=true \
-  --kubeconfig=/var/lib/kube-scheduler/kubeconfig
+    --leader-elect=true \
+    --kubeconfig=/var/lib/kube-scheduler/kubeconfig
 Restart=on-failure
 RestartSec=5
 

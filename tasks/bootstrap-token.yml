@@ -1,0 +1,49 @@
+---
+- name: Check if bootstrap token is installed
+  command: kubectl --namespace=kube-system get secret/bootstrap-token-{{ k8s_token_id }}
+  run_once: yes
+  ignore_errors: yes
+  register: token_installed
+
+- when: token_installed.rc > 0
+  name: Create bootstrap token secret
+  run_once: yes
+  shell: |
+    kubectl -n kube-system create secret generic bootstrap-token-{{ k8s_token_id }} \
+            --type 'bootstrap.kubernetes.io/token' \
+            --from-literal description="cluster bootstrap token" \
+            --from-literal token-id={{ k8s_token_id }} \
+            --from-literal token-secret={{ k8s_token_secret }} \
+            --from-literal usage-bootstrap-authentication=true \
+            --from-literal usage-bootstrap-signing=true
+
+- name: Check if clusterrolebinding kubelet-bootstrap is installed
+  command: kubectl get clusterrolebinding system:node-bootstrap
+  run_once: yes
+  ignore_errors: yes
+  register: clusterrolebinding_installed
+
+- when: clusterrolebinding_installed.rc > 0
+  name: Allow certificate signing requests during bootstrap
+  run_once: yes
+  shell: |
+    # allow certificate signing request
+    kubectl create clusterrolebinding bootstrap:csr \
+            --clusterrole system:node-bootstrapper \
+            --group system:bootstrappers;
+
+    # auto approve client certificate
+    kubectl create clusterrolebinding bootstrap:approve \
+            --clusterrole system:certificates.k8s.io:certificatesigningrequests:nodeclient \
+            --group system:bootstrappers;
+
+    # auto approve client certificate renewal
+    kubectl create clusterrolebinding bootstrap:renew \
+            --clusterrole system:certificates.k8s.io:certificatesigningrequests:selfnodeclient \
+            --group system:bootstrappers;
+
+- when: clusterrolebinding_installed.rc > 0
+  name: Auto approve certificate signing requests during bootstrap
+  run_once: yes
+  shell: |
+

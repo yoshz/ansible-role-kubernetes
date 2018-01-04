@@ -17,32 +17,68 @@
   - Reload systemd daemon
   - Restart kubelet
 
-- name: Create /var/lib/kubelet
+- name: Create directory /var/lib/kubelet
   file:
     state: directory
     path: /var/lib/kubelet
 
-- name: Create kubeconfig
-  template:
-    src: kubeconfig.j2
-    dest: /var/lib/kubelet/kubeconfig
-  vars:
-    cert: "{{ inventory_hostname }}"
-    user: "system:node:{{ inventory_hostname }}"
-  notify:
-  - Restart kubelet
+- name: Create bootstrap.kubeconfig
+  shell: |
+    kubectl config set-cluster default \
+            --certificate-authority={{ k8s_certs_dst }}/ca.crt \
+            --embed-certs=true \
+            --server=https://{{ k8s_apiserver }}:6443 \
+            --kubeconfig=/var/lib/kubelet/bootstrap.kubeconfig;
+
+    kubectl config set-credentials kubelet-bootstrap \
+            --token={{ k8s_token_id }}.{{ k8s_token_secret }} \
+            --kubeconfig=/var/lib/kubelet/bootstrap.kubeconfig;
+
+    kubectl config set-context default \
+            --cluster=default \
+            --user=kubelet-bootstrap \
+            --kubeconfig=/var/lib/kubelet/bootstrap.kubeconfig;
+
+    kubectl config use-context default \
+            --kubeconfig=/var/lib/kubelet/bootstrap.kubeconfig;
+  args:
+    chdir: /var/lib/kubelet
+    creates: bootstrap.kubeconfig
+
+- name: Generate kubelet certificate
+  connection: local
+  shell: |
+    set -e;
+    export NODE_NAME={{ inventory_hostname }}
+    export NODE_IP={{ k8s_advertise_ip }}
+    openssl genrsa -out {{ inventory_hostname }}.key 2048;
+    openssl req -new -key {{ inventory_hostname }}.key -out {{ inventory_hostname }}.csr -subj "/CN=system:node:{{ inventory_hostname }}/O=system:nodes" -config node.conf;
+    openssl x509 -req -in {{ inventory_hostname }}.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out {{ inventory_hostname }}.crt -days 3650 -extensions v3_req -extfile node.conf;
+    rm -f {{ inventory_hostname }}.csr;
+  args:
+    chdir: "{{ k8s_certs_src }}"
+    creates: "{{ inventory_hostname }}.crt"
+
+- name: Create /var/lib/kubelet/pki
+  file:
+    state: directory
+    path: /var/lib/kubelet/pki
 
 - name: Install kubelet certificate
   copy:
     src: "{{ k8s_certs_src }}/{{ inventory_hostname }}.crt"
     dest: "/var/lib/kubelet/pki/kubelet.crt"
     mode: 0644
+  notify:
+    - Restart kubelet
 
 - name: Install kubelet private key
   copy:
     src: "{{ k8s_certs_src }}/{{ inventory_hostname }}.key"
     dest: "/var/lib/kubelet/pki/kubelet.key"
     mode: 0600
+  notify:
+    - Restart kubelet
 
 - name: Allow kubelet traffic internally
   ufw: rule=allow port=10250,10255 proto=tcp src={{ hostvars[item]['ansible_' + k8s_network_iface]['ipv4']['address'] }}

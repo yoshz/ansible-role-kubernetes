@@ -24,4 +24,4 @@
   - ca.key
   - server.crt
   - server.key
-  when: "'k8s-master' in groups"
+  when: "'k8s-master' in group_names"

@@ -54,17 +54,3 @@
   template:
     src: openssl/node.j2
     dest: "{{ k8s_certs_src }}/node.conf"
-
-- name: Generate node certificates
-  shell: |
-    set -e;
-    export NODE_NAME={{ item }}
-    export NODE_IP={{ hostvars[item]['ansible_' + k8s_network_iface]['ipv4']['address'] }}
-    openssl genrsa -out {{ item }}.key 2048;
-    openssl req -new -key {{ item }}.key -out {{ item }}.csr -subj "/CN=system:node:{{ item }}/O=system:nodes" -config node.conf;
-    openssl x509 -req -in {{ item }}.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out {{ item }}.crt -days 3650 -extensions v3_req -extfile node.conf;
-    rm -f {{ item }}.csr;
-  args:
-    chdir: "{{ k8s_certs_src }}"
-    creates: "{{ item }}.crt"
-  with_items: "{{ groups['k8s-node'] }}"

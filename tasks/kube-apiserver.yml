@@ -6,6 +6,27 @@
     dest: /usr/local/bin/kube-apiserver
     mode: 0755
 
+- name: Create /var/lib/kube-apiserver/pki
+  file:
+    state: directory
+    path: /var/lib/kube-apiserver/pki
+
+- name: Install kubelet client certificate
+  copy:
+    src: "{{ k8s_certs_src }}/admin.crt"
+    dest: "/var/lib/kube-apiserver/pki/kubelet-client.crt"
+    mode: 0644
+  notify:
+    - Restart kubelet
+
+- name: Install kubelet client private key
+  copy:
+    src: "{{ k8s_certs_src }}/admin.key"
+    dest: "/var/lib/kube-apiserver/pki/kubelet-client.key"
+    mode: 0600
+  notify:
+    - Restart kubelet
+
 - name: Install kube-apiserver systemd configuration
   template:
     src: systemd/kube-apiserver.j2

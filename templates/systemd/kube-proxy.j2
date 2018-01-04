@@ -4,9 +4,9 @@ Documentation=https://github.com/kubernetes/kubernetes
 
 [Service]
 ExecStart=/usr/local/bin/kube-proxy \
-  --cluster-cidr={{ k8s_service_subnet }} \
-  --kubeconfig=/var/lib/kube-proxy/kubeconfig \
-  --proxy-mode=iptables
+    --cluster-cidr={{ k8s_service_subnet }} \
+    --kubeconfig=/var/lib/kube-proxy/kubeconfig \
+    --proxy-mode=iptables
 Restart=on-failure
 RestartSec=5
 

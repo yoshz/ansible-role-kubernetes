@@ -14,6 +14,7 @@ Kubernetes is installed and configured with the following choices. (See [Usage](
 
 - [X] Installs `etcd`, `kube-apiserver`, `kube-controller-manager`, `kube-scheduler` as systemd service on each master node in high availabity mode
 - [X] Installs `kube-proxy` and `kubelet` as systemd service on each worker node
+- [X] Uses a bootstrap token to automatically generate client certificates for kubelet
 - [X] Configures ufw rules to allow traffic between in each node
 - [X] Installs `flannel` as network overlay
 - [X] Installs cluster add-ons: `kube-dns`, `heapster` and `kubernetes-dashboard`
@@ -23,7 +24,6 @@ Kubernetes is installed and configured with the following choices. (See [Usage](
 Todo's
 ------
 
-- [ ] Configure Webhook authentication for Kubelet
 - [ ] Configure apiserver load balancing for kubelet and kube-proxy
 - [ ] Install logging aggregation
 - [ ] Replace Docker with [cri-containerd](https://github.com/kubernetes-incubator/cri-containerd) runtime
@@ -130,15 +130,33 @@ And prepend the role to the playbook:
     docker_options: --iptables=false --ip-masq=false
 ```
 
+Bootstrap token
+---------------
+
+A bootstrap token is required to for kubelet to join the cluster.
+
+The following command will generate the values `k8s_token_id` and `k8s_token_secret` variables
+that you will need to add to your playbook or vars file.
+
+```bash
+# k8s_token_id
+openssl rand -hex 3
+# k8s_token_secret
+openssl rand -hex 8
+```
+
 Usage
 =====
+
+Installation steps
+------------------
 
 Each installation step has a different tag which makes it possible to provision your nodes step by step.
 
 To run a specific step:
 ```bash
 ansible-playbook -i [inventory] [playbook] --tags [tag]
-``` 
+```
 
 #### certs-generate
 Locally generates the private keys and certificates.
@@ -162,11 +180,17 @@ Installs kube-controller-manager on each master as systemd service.
 #### kube-scheduler
 Installs kube-scheduler on each master as systemd service.
 
+#### bootstrap-token
+Installs bootstrap token secret and enable auto approval of certificate signing requests.
+
 #### cni
 Installs cni configuration file needed before starting Kubelet.
 
 #### kubelet
 Installs kubelet as systemd service on each worker node.
+
+#### kube-proxy
+Installs kube-proxy on each node as systemd service.
 
 #### flannel
 Installs flannel as DaemonSet.
@@ -185,7 +209,7 @@ Installs dashboard as Deployment and adds an Ingress rule on:
 http://dashboard.<public_dns>/.
 
 #### traefik
-Installs treafik as Ingress Controller and adds an Ingress rule to enable web-ui on http://traefik.<public_dns>/.
+Installs traefik as Ingress Controller and adds an Ingress rule to enable web-ui on http://traefik.<public_dns>/.
 
 
 License

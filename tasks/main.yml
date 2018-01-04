@@ -35,9 +35,9 @@
   when: "'k8s-master' in group_names"
   tags: kube-scheduler
 
-- import_tasks: kube-proxy.yml
-  when: "'k8s-node' in groups"
-  tags: kube-proxy
+- import_tasks: bootstrap-token.yml
+  when: "'k8s-master' in group_names"
+  tags: bootstrap-token
 
 - import_tasks: cni.yml
   when: "'k8s-node' in group_names"
@@ -46,6 +46,10 @@
 - import_tasks: kubelet.yml
   when: "'k8s-node' in group_names"
   tags: kubelet
+
+- import_tasks: kube-proxy.yml
+  when: "'k8s-node' in group_names"
+  tags: kube-proxy
 
 - import_tasks: flannel.yml
   when: "'k8s-master' in group_names"

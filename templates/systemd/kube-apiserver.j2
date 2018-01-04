@@ -11,14 +11,15 @@ ExecStart=/usr/local/bin/kube-apiserver \
     --authorization-mode=Node,RBAC \
     --bind-address=0.0.0.0 \
     --client-ca-file={{ k8s_certs_dst }}/ca.crt \
+    --enable-bootstrap-token-auth \
     --etcd-cafile={{ k8s_certs_dst }}/ca.crt \
     --etcd-certfile={{ k8s_certs_dst }}/server.crt \
     --etcd-keyfile={{ k8s_certs_dst }}/server.key \
     --etcd-servers={{ k8s_etcd_servers }} \
     --insecure-port=0 \
     --kubelet-certificate-authority={{ k8s_certs_dst }}/ca.crt \
-    --kubelet-client-certificate={{ k8s_certs_dst }}/server.crt \
-    --kubelet-client-key={{ k8s_certs_dst }}/server.key \
+    --kubelet-client-certificate=/var/lib/kube-apiserver/pki/kubelet-client.crt \
+    --kubelet-client-key=/var/lib/kube-apiserver/pki/kubelet-client.key \
     --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname \
     --kubelet-https=true \
     --runtime-config=api/all \

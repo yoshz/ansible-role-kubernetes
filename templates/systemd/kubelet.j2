@@ -7,17 +7,15 @@ Requires=docker.service
 [Service]
 ExecStart=/usr/local/bin/kubelet \
     --allow-privileged=true \
-    #--anonymous-auth=false \
-    --authorization-mode=AlwaysAllow \
-    #--authorization-mode=Webhook \
-    #--client-ca-file={{ k8s_certs_dst }}/ca.crt \
+    --authorization-mode=Webhook \
+    --bootstrap-kubeconfig=/var/lib/kubelet/bootstrap.kubeconfig \
+    --client-ca-file={{ k8s_certs_dst }}/ca.crt \
     --cluster-dns={{ k8s_dns_ip }} \
     --cluster-domain=cluster.local \
-    --fail-swap-on=false \
     --kubeconfig=/var/lib/kubelet/kubeconfig \
     --network-plugin=cni \
     --pod-cidr={{ k8s_pod_subnet }} \
-    --register-node=true \
+    --rotate-certificates \
     --v=2
 Restart=on-failure
 StartLimitInterval=0
