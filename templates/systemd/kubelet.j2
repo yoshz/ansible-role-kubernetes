@@ -12,6 +12,7 @@ ExecStart=/usr/local/bin/kubelet \
     --client-ca-file={{ k8s_certs_dst }}/ca.crt \
     --cluster-dns={{ k8s_dns_ip }} \
     --cluster-domain=cluster.local \
+    --hostname-override={{ inventory_hostname }} \
     --kubeconfig=/var/lib/kubelet/kubeconfig \
     --network-plugin=cni \
     --pod-cidr={{ k8s_pod_subnet }} \
