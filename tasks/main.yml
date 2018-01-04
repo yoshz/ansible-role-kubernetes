@@ -1,29 +1,38 @@
 ---
-- import_tasks: kubectl.yml
-  tags: kubectl
+- name: Gather network facts from all kubernetes hosts
+  setup: gather_subset=network
+  delegate_to: "{{ item }}"
+  delegate_facts: True
+  with_items: "{{ groups['kubernetes'] }}"
+  run_once: yes
+  tags: [always]
 
 - import_tasks: certs-generate.yml
   connection: local
   run_once: yes
+  when: "'k8s-master' in group_names"
   tags: [certs, certs-generate]
 
 - import_tasks: certs-install.yml
   tags: [certs, certs-install]
 
+- import_tasks: kubectl.yml
+  tags: kubectl
+
 - import_tasks: etcd.yml
-  when: "'etcd' in groups"
+  when: "'etcd' in group_names"
   tags: etcd
 
 - import_tasks: kube-apiserver.yml
-  when: "'k8s-master' in groups"
+  when: "'k8s-master' in group_names"
   tags: kube-apiserver
 
 - import_tasks: kube-controller-manager.yml
-  when: "'k8s-master' in groups"
+  when: "'k8s-master' in group_names"
   tags: kube-controller-manager
 
 - import_tasks: kube-scheduler.yml
-  when: "'k8s-master' in groups"
+  when: "'k8s-master' in group_names"
   tags: kube-scheduler
 
 - import_tasks: kube-proxy.yml
@@ -31,27 +40,33 @@
   tags: kube-proxy
 
 - import_tasks: cni.yml
-  when: "'k8s-node' in groups"
+  when: "'k8s-node' in group_names"
   tags: cni
 
 - import_tasks: kubelet.yml
-  when: "'k8s-node' in groups"
+  when: "'k8s-node' in group_names"
   tags: kubelet
 
 - import_tasks: flannel.yml
+  when: "'k8s-master' in group_names"
   tags: flannel
 
 - import_tasks: kube-dns.yml
+  when: "'k8s-master' in group_names"
   tags: kube-dns
 
 - import_tasks: heapster.yml
+  when: "'k8s-master' in group_names"
   tags: heapster
 
 - import_tasks: basic-auth.yml
+  when: "'k8s-master' in group_names"
   tags: basic-auth
 
 - import_tasks: dashboard.yml
+  when: "'k8s-master' in group_names"
   tags: dashboard
 
 - import_tasks: traefik.yml
+  when: "'k8s-master' in group_names"
   tags: traefik

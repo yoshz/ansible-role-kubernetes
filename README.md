@@ -23,9 +23,12 @@ Kubernetes is installed and configured with the following choices. (See [Usage](
 Todo's
 ------
 
-- [ ] Replace Docker with [cri-containerd](https://github.com/kubernetes-incubator/cri-containerd) runtime
 - [ ] Configure Webhook authentication for Kubelet
+- [ ] Configure apiserver load balancing for kubelet and kube-proxy
+- [ ] Install logging aggregation
+- [ ] Replace Docker with [cri-containerd](https://github.com/kubernetes-incubator/cri-containerd) runtime
 - [ ] Configure VPN connection between each node
+- [ ] Configure [data encryption](https://kubernetes.io/docs/tasks/administer-cluster/encrypt-data/)
 
 Installation
 ============
@@ -143,6 +146,9 @@ These files will be saved in the `k8s_certs_src` directory.
 
 #### certs-install
 Installs the private keys and certificates on each node.
+
+#### kubectl
+Installs kubectl and configures kubeconfig for root.
 
 #### etcd
 Installs etcd on each master and initialise cluster.
