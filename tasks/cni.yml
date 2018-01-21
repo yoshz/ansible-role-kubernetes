@@ -1,11 +1,12 @@
 ---
-- name: Create CNI configuration directory
+- name: Create CNI plugin directory
   file:
     state: directory
-    path: /etc/cni/net.d/
+    path: /opt/cni/bin
     recurse: yes
 
-- name: Install CNI configuration file
-  template:
-    src: cni.j2
-    dest: /etc/cni/net.d/10-flannel.conflist
+- name: Install CNI plugins
+  unarchive:
+    src: https://github.com/containernetworking/plugins/releases/download/v0.6.0/cni-plugins-amd64-v0.6.0.tgz
+    dest: /opt/cni/bin
+    remote_src: yes

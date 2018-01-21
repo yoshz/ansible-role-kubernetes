@@ -8,7 +8,7 @@
 - when: flannel_installed.rc > 0
   run_once: yes
   block:
-  - name: Ensure flannel configuration
+  - name: Create flannel manifest
     template:
       src: addons/flannel.j2
       dest: /tmp/flannel.yml
