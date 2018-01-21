@@ -5,6 +5,8 @@
     checksum: "{{ k8s_kubecontrollermanager_checksum }}"
     dest: /usr/local/bin/kube-controller-manager
     mode: 0755
+  notify:
+  - Restart kube-controller-manager
 
 - name: Install kube-controller-manager systemd configuration
   template:

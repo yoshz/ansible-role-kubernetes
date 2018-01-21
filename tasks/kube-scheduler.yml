@@ -5,6 +5,8 @@
     checksum: "{{ k8s_kubescheduler_checksum }}"
     dest: /usr/local/bin/kube-scheduler
     mode: 0755
+  notify:
+  - Restart kube-scheduler
 
 - name: Install kube-scheduler systemd configuration
   template:

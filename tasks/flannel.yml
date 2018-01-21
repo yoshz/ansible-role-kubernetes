@@ -22,4 +22,4 @@
 
 - name: Allow flannel traffic internally
   ufw: rule=allow port=8285,8472 proto=udp src={{ hostvars[item]['ansible_' + k8s_network_iface]['ipv4']['address'] }}
-  with_items: "{{ groups['k8s-master'] }}"
+  with_items: "{{ groups['k8s-node'] }}"

@@ -5,6 +5,8 @@
     checksum: "{{ k8s_kubeproxy_checksum }}"
     dest: /usr/local/bin/kube-proxy
     mode: 0755
+  notify:
+  - Restart kube-proxy
 
 - name: Install kube-proxy systemd configuration
   template:
@@ -38,7 +40,7 @@
 - name: Allow traffic to external services
   ufw: rule=allow port=30000:32767 proto=tcp
 
-- name: Allow all traffic from pods
+- name: Allow all input traffic from pods
   ufw: rule=allow src={{ k8s_pod_subnet }}
 
 - name: Ensure kube-proxy is started at boot

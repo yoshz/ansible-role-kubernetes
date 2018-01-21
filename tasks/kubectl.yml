@@ -11,7 +11,7 @@
     state: directory
     path: /root/.kube
 
-- name: Create kubeconfig
+- name: Create /root/.kube/config
   template:
     src: kubeconfig.j2
     dest: /root/.kube/config

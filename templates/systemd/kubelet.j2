@@ -6,13 +6,16 @@ Requires=docker.service
 
 [Service]
 ExecStart=/usr/local/bin/kubelet \
+    --address={{ k8s_advertise_ip }} \
     --allow-privileged=true \
     --authorization-mode=Webhook \
     --bootstrap-kubeconfig=/var/lib/kubelet/bootstrap.kubeconfig \
     --client-ca-file={{ k8s_certs_dst }}/ca.crt \
     --cluster-dns={{ k8s_dns_ip }} \
     --cluster-domain=cluster.local \
+    --healthz-bind-address={{ k8s_advertise_ip }} \
     --hostname-override={{ inventory_hostname }} \
+    --node-ip={{ k8s_advertise_ip }} \
     --kubeconfig=/var/lib/kubelet/kubeconfig \
     --network-plugin=cni \
     --pod-cidr={{ k8s_pod_subnet }} \

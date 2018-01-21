@@ -5,6 +5,8 @@
     checksum: "{{ k8s_kubeapiserver_checksum }}"
     dest: /usr/local/bin/kube-apiserver
     mode: 0755
+  notify:
+  - Restart kube-apiserver
 
 - name: Create /var/lib/kube-apiserver/pki
   file:
@@ -17,7 +19,7 @@
     dest: "/var/lib/kube-apiserver/pki/kubelet-client.crt"
     mode: 0644
   notify:
-    - Restart kubelet
+  - Restart kubelet
 
 - name: Install kubelet client private key
   copy:
@@ -25,7 +27,7 @@
     dest: "/var/lib/kube-apiserver/pki/kubelet-client.key"
     mode: 0600
   notify:
-    - Restart kubelet
+  - Restart kubelet
 
 - name: Install kube-apiserver systemd configuration
   template:

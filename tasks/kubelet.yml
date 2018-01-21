@@ -82,7 +82,7 @@
 
 - name: Allow kubelet traffic internally
   ufw: rule=allow port=10250,10255 proto=tcp src={{ hostvars[item]['ansible_' + k8s_network_iface]['ipv4']['address'] }}
-  with_items: "{{ groups['k8s-master'] }}"
+  with_items: "{{ groups['kubernetes'] }}"
 
 - name: Ensure kubelet is started at boot
   service: name=kubelet daemon_reload=yes state=started enabled=yes
