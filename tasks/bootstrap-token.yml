@@ -18,7 +18,7 @@
             --from-literal usage-bootstrap-signing=true
 
 - name: Check if clusterrolebinding kubelet-bootstrap is installed
-  command: kubectl get clusterrolebinding system:node-bootstrap
+  command: kubectl get clusterrolebinding bootstrap:csr
   run_once: yes
   ignore_errors: yes
   register: clusterrolebinding_installed
@@ -41,9 +41,3 @@
     kubectl create clusterrolebinding bootstrap:renew \
             --clusterrole system:certificates.k8s.io:certificatesigningrequests:selfnodeclient \
             --group system:bootstrappers;
-
-- when: clusterrolebinding_installed.rc > 0
-  name: Auto approve certificate signing requests during bootstrap
-  run_once: yes
-  shell: |
-
