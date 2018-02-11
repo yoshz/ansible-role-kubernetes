@@ -71,6 +71,3 @@
   when: "'k8s-master' in group_names"
   tags: dashboard
 
-- import_tasks: traefik.yml
-  when: "'k8s-master' in group_names"
-  tags: traefik

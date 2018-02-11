@@ -208,8 +208,6 @@ Installs basic-auth secret which is used for basic authentication for Dashboard 
 Installs dashboard as Deployment and adds an Ingress rule on:
 http://dashboard.<public_dns>/.
 
-#### traefik
-Installs traefik as Ingress Controller and adds an Ingress rule to enable web-ui on http://traefik.<public_dns>/.
 
 
 License
