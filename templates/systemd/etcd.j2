@@ -6,21 +6,21 @@ Documentation=https://github.com/coreos
 Type=notify
 ExecStart=/usr/local/bin/etcd \
     --name={{ inventory_hostname }} \
-    --cert-file={{ k8s_certs_dst }}/server.crt \
-    --key-file={{ k8s_certs_dst }}/server.key \
-    --peer-cert-file={{ k8s_certs_dst }}/server.crt \
-    --peer-key-file={{ k8s_certs_dst }}/server.key \
-    --trusted-ca-file={{ k8s_certs_dst }}/ca.crt \
-    --peer-trusted-ca-file={{ k8s_certs_dst }}/ca.crt \
+    --cert-file=/etc/etcd/server.crt \
+    --key-file=/etc/etcd/server.key \
+    --peer-cert-file=/etc/etcd/server.crt \
+    --peer-key-file=/etc/etcd/server.key \
+    --trusted-ca-file=/etc/etcd/ca.crt \
+    --peer-trusted-ca-file=/etc/etcd/ca.crt \
     --peer-client-cert-auth \
     --client-cert-auth \
-    --initial-advertise-peer-urls=https://{{ k8s_advertise_ip }}:2380 \
     --listen-peer-urls=https://{{ k8s_advertise_ip }}:2380 \
     --listen-client-urls=https://{{ k8s_advertise_ip }}:2379,http://127.0.0.1:2379 \
     --advertise-client-urls=https://{{ k8s_advertise_ip }}:2379 \
+    --initial-advertise-peer-urls=https://{{ k8s_advertise_ip }}:2380 \
     --initial-cluster-token=etcd-cluster-0 \
-    --initial-cluster={% for host in groups['etcd'] -%}{{ host }}=https://{{ hostvars[host]['ansible_' + k8s_network_iface]['ipv4']['address'] }}:2380{%- if not loop.last %},{% endif -%}{%- endfor -%} \
-    --initial-cluster-state=new \
+    --initial-cluster={% for host in groups['etcd'] -%}{{ host }}=https://{{ hostvars[host]['ansible_' + k8s_network_iface]['ipv4']['address'] }}:2380{%- if not loop.last %},{% endif -%}{%- endfor %} \
+    --initial-cluster-state={% if etcd_binary.stat.exists %}existing{% else %}new{% endif %} \
     --data-dir=/var/lib/etcd
 Restart=on-failure
 RestartSec=5

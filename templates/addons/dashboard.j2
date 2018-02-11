@@ -75,20 +75,3 @@ spec:
     targetPort: 9090
   selector:
     k8s-app: kubernetes-dashboard
----
-apiVersion: extensions/v1beta1
-kind: Ingress
-metadata:
-  name: kubernetes-dashboard
-  namespace: kube-system
-  annotations:
-    ingress.kubernetes.io/auth-type: "basic"
-    ingress.kubernetes.io/auth-secret: "basic-auth"
-spec:
-  rules:
-  - host: dashboard.{{ k8s_public_dns }}
-    http:
-      paths:
-      - backend:
-          serviceName: kubernetes-dashboard
-          servicePort: 80

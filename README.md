@@ -205,10 +205,22 @@ Installs heapster in standalone mode as Deployment.
 Installs basic-auth secret which is used for basic authentication for Dashboard and Traefik.
 
 #### dashboard
-Installs dashboard as Deployment and adds an Ingress rule on:
-http://dashboard.<public_dns>/.
+Installs Kubernetes dashboard
 
 
+Etcd
+----
+
+To list all etcd member run the following command on one of the nodes:
+```bash
+ETCDCTL_API=3 etcdctl member list
+```
+
+If the cluster is already initialized and you want to add additional members run:
+Make sure you add one member at a time.
+```bash
+ETCDCTL_API=3 etcdctl member add <node> --peer-urls=https://<ip>:2380 --endpoints=https://<ip>:2380
+```
 
 License
 =======

@@ -47,6 +47,58 @@
         path: /tmp/etcd-v{{ etcd_version }}-linux-amd64
         state: absent
 
+- name: Generate etcd CA private key
+  connection: local
+  run_once: true
+  openssl_privatekey:
+    path: "{{ k8s_certs_src }}/etcd-ca.key"
+
+- name: Generate etcd CA certificate
+  connection: local
+  run_once: true
+  shell: openssl req -x509 -new -nodes -key etcd-ca.key -days 3650 -out etcd-ca.crt -subj "/CN=etcd-ca"
+  args:
+    chdir: "{{ k8s_certs_src }}"
+    creates: "etcd-ca.crt"
+
+- name: Generate etcd server certificate
+  connection: local
+  shell: |
+    set -e;
+    export NODE_NAME={{ inventory_hostname }}
+    export NODE_IP={{ k8s_advertise_ip }}
+    openssl genrsa -out etcd-{{ inventory_hostname }}.key 2048;
+    openssl req -new -key etcd-{{ inventory_hostname }}.key -out etcd-{{ inventory_hostname }}.csr -subj "/CN=etcd-{{ inventory_hostname }}" -config node.conf;
+    openssl x509 -req -in etcd-{{ inventory_hostname }}.csr -CA etcd-ca.crt -CAkey etcd-ca.key -CAcreateserial -out etcd-{{ inventory_hostname }}.crt -days 3650 -extensions v3_req -extfile node.conf;
+    rm -f etcd-{{ inventory_hostname }}.csr;
+  args:
+    chdir: "{{ k8s_certs_src }}"
+    creates: "etcd-{{ inventory_hostname }}.crt"
+
+- name: Install etcd CA certificate
+  copy:
+    src: "{{ k8s_certs_src }}/etcd-ca.crt"
+    dest: "/etc/etcd/ca.crt"
+    mode: 0644
+  notify:
+    - Restart etcd
+
+- name: Install etcd server certificate
+  copy:
+    src: "{{ k8s_certs_src }}/etcd-{{ inventory_hostname }}.crt"
+    dest: "/etc/etcd/server.crt"
+    mode: 0644
+  notify:
+    - Restart etcd
+
+- name: Install etcd server private key
+  copy:
+    src: "{{ k8s_certs_src }}/etcd-{{ inventory_hostname }}.key"
+    dest: "/etc/etcd/server.key"
+    mode: 0600
+  notify:
+    - Restart etcd
+
 - name: Install etcd systemd configuration
   template:
     src: systemd/etcd.j2
@@ -54,7 +106,9 @@
     owner: root
     group: root
     mode: 0664
-  notify: Restart etcd
+  notify:
+    - Reload systemd daemon
+    - Restart etcd
 
 - name: Open etcd ports
   ufw: rule=allow port=2379,2380 proto=tcp src={{ hostvars[item]['ansible_' + k8s_network_iface]['ipv4']['address'] }}
