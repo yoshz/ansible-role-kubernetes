@@ -19,7 +19,7 @@
     dest: "/var/lib/kube-apiserver/pki/kubelet-client.crt"
     mode: 0644
   notify:
-  - Restart kubelet
+  - Restart kube-apiserver
 
 - name: Install kubelet client private key
   copy:
@@ -27,7 +27,7 @@
     dest: "/var/lib/kube-apiserver/pki/kubelet-client.key"
     mode: 0600
   notify:
-  - Restart kubelet
+  - Restart kube-apiserver
 
 - name: Install kube-apiserver systemd configuration
   template:
