@@ -8,6 +8,12 @@
   run_once: yes
   tags: [always]
 
+- name: Install dependencies
+  apt: name={{ item }}
+  with_items:
+  - socat
+  tags: [dependencies]
+
 - import_tasks: certs-generate.yml
   connection: local
   run_once: yes
