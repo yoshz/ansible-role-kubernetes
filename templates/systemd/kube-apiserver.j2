@@ -5,7 +5,7 @@ Documentation=https://github.com/kubernetes/kubernetes
 [Service]
 ExecStart=/usr/local/bin/kube-apiserver \
     --admission-control=Initializers,NamespaceLifecycle,LimitRanger,ServiceAccount,PersistentVolumeLabel,DefaultStorageClass,DefaultTolerationSeconds,NodeRestriction,ResourceQuota \
-    --advertise-address={{ hostvars[inventory_hostname]['ansible_' + k8s_network_iface]['ipv4']['address'] }} \
+    --advertise-address={{ k8s_advertise_ip }} \
     --allow-privileged=true \
     --apiserver-count={{ groups['k8s-master']|count }} \
     --authorization-mode=Node,RBAC \
