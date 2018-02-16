@@ -4,3 +4,13 @@
     kubectl --namespace=kube-system get daemonset weave-net || \
     kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
   run_once: yes
+
+- name: Create cni configuration directory
+  file:
+    state: directory
+    path: /etc/cni/net.d/
+
+- name: Override cni configuration file
+  template:
+    src: cni/weave.j2
+    dest: /etc/cni/net.d/00-weave.conflist
