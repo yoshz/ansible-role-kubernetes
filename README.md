@@ -190,6 +190,9 @@ Installs kube-proxy on each node as systemd service.
 #### flannel
 Installs flannel as DaemonSet.
 
+#### weave
+Installs weave-net as DaemonSet.
+
 #### kube-dns
 Installs kube-dns as Deployment.
 

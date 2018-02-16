@@ -8,6 +8,7 @@ k8s_kubelet_checksum: sha256:56dd720c239987a2a30ea1c2ae0497788efab0477c0198f592d
 
 k8s_network_iface: eth0
 k8s_certs_dst: /etc/kubernetes/certs
+k8s_network_plugin: weave
 
 k8s_apiserver_public_ip: "{{ ansible_default_ipv4['address'] }}"
 k8s_apiserver_service_ip: 10.96.0.1
