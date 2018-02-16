@@ -9,10 +9,13 @@ ExecStart=/usr/local/bin/kubelet \
     --address={{ k8s_advertise_ip }} \
     --allow-privileged=true \
     --authorization-mode=Webhook \
-    {% if k8s_token_id -%}
+    {%- if k8s_token_id %}
     --bootstrap-kubeconfig=/var/lib/kubelet/bootstrap.kubeconfig \
     {% endif %}
     --client-ca-file={{ k8s_certs_dst }}/ca.crt \
+    {%- if k8s_cloud_provider %}
+    --cloud-provider={{ k8s_cloud_provider }} \
+    {% endif %}
     --cluster-dns={{ k8s_dns_ip }} \
     --cluster-domain=cluster.local \
     --healthz-bind-address={{ k8s_advertise_ip }} \
@@ -20,7 +23,7 @@ ExecStart=/usr/local/bin/kubelet \
     --network-plugin=cni \
     --node-ip={{ k8s_advertise_ip }} \
     --pod-cidr={{ k8s_pod_subnet }} \
-    {% if k8s_token_id -%}
+    {%- if k8s_token_id %}
     --rotate-certificates \
     {% endif %}
     --v=2
