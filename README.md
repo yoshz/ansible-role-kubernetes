@@ -14,12 +14,9 @@ Kubernetes is installed and configured with the following choices. (See [Usage](
 
 - [X] Installs `etcd`, `kube-apiserver`, `kube-controller-manager`, `kube-scheduler` as systemd service on each master node in high availabity mode
 - [X] Installs `kube-proxy` and `kubelet` as systemd service on each worker node
-- [X] Uses a bootstrap token to automatically generate client certificates for kubelet
 - [X] Configures ufw rules to allow traffic between in each node
-- [X] Installs `flannel` as network overlay
+- [X] Installs `weave-net` or `flannel` as network overlay
 - [X] Installs cluster add-ons: `kube-dns`, `heapster` and `kubernetes-dashboard`
-- [X] Installs Traefik as ingress controller
-- [X] Configures default ingress rules with basic authentication
 
 Todo's
 ------
@@ -27,7 +24,6 @@ Todo's
 - [ ] Configure apiserver load balancing for kubelet and kube-proxy
 - [ ] Install logging aggregation
 - [ ] Replace Docker with [cri-containerd](https://github.com/kubernetes-incubator/cri-containerd) runtime
-- [ ] Configure VPN connection between each node
 - [ ] Configure [data encryption](https://kubernetes.io/docs/tasks/administer-cluster/encrypt-data/)
 
 Installation
@@ -91,15 +87,18 @@ Put all nodes that should be master in the `k8s-master` group and workers in the
 Playbook
 --------
 
-Create a playbook with the following content:
+Create a playbook with the following contents:
+
 ```yaml
 - hosts: kubernetes
   roles:
   - role: yoshz.kubernetes
-    k8s_version: 1.9.0
-    # Local location to store generated certificates 
-    k8s_certs_src: ../certs
+    k8s_certs_src: ../certs     # Local location to store generated certificates
+    k8s_network_iface: eth0     # Specify a different interface for local traffic
+    k8s_network_plugin: flannel # Use flannel instead of weave-net
 ```
+
+For all options see [defaults/main.yml](defaults/main.yml)
 
 Docker
 ------
@@ -122,22 +121,6 @@ And prepend the role to the playbook:
   - role: yoshz.docker
     docker_version: 1.12.6
     docker_options: --iptables=false --ip-masq=false
-```
-
-Bootstrap token
----------------
-
-A bootstrap token can be used for kubelet to join the cluster.
-With a bootstrap token a bootstrap.kubeconfig is used the first time to request a new certificate.
-
-The following command will generate the values `k8s_token_id` and `k8s_token_secret` variables
-that you will need to add to your playbook or vars file.
-
-```bash
-# k8s_token_id
-openssl rand -hex 3
-# k8s_token_secret
-openssl rand -hex 8
 ```
 
 Usage
@@ -215,6 +198,33 @@ If the cluster is already initialized and you want to add additional members run
 Make sure you add one member at a time.
 ```bash
 ETCDCTL_API=3 etcdctl member add <node> --peer-urls=https://<ip>:2380 --endpoints=https://<ip>:2380
+```
+
+
+Bootstrap token
+---------------
+
+A bootstrap token can also be used for kubelet to join the cluster instead of pre-generated certificates.<br>
+With a bootstrap token a bootstrap.kubeconfig is used the first time to request a new certificate.<br>
+Certificates will also automatically renew before they expire.
+
+First you need to generate a token id and secret:
+
+```bash
+# k8s_token_id
+openssl rand -hex 3
+# k8s_token_secret
+openssl rand -hex 8
+```
+
+And add these to your playbook:
+
+```yaml
+- hosts: kubernetes
+  roles:
+  - role: yoshz.kubernetes
+    k8s_token_id: ...
+    k8s_token_secret: ...
 ```
 
 License
