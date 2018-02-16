@@ -3,6 +3,7 @@
   setup: gather_subset=network
   delegate_to: "{{ item }}"
   delegate_facts: True
+  when: hostvars[item] is not defined
   with_items: "{{ groups['kubernetes'] }}"
   run_once: yes
   tags: [always]
