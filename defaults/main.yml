@@ -20,4 +20,5 @@ k8s_internal_subnet: 10.0.0.0/8
 k8s_token_id: ~
 k8s_token_secret: ~
 
+cni_version: 0.6.0
 etcd_version: 3.2.11

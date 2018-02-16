@@ -7,6 +7,6 @@
 
 - name: Install CNI plugins
   unarchive:
-    src: https://github.com/containernetworking/plugins/releases/download/v0.6.0/cni-plugins-amd64-v0.6.0.tgz
+    src: https://github.com/containernetworking/plugins/releases/download/v{{ cni_version }}/cni-plugins-amd64-v{{ cni_version }}.tgz
     dest: /opt/cni/bin
     remote_src: yes
