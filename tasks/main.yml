@@ -63,10 +63,6 @@
   when: "'k8s-master' in group_names"
   tags: heapster
 
-- import_tasks: basic-auth.yml
-  when: "'k8s-master' in group_names"
-  tags: basic-auth
-
 - import_tasks: dashboard.yml
   when: "'k8s-master' in group_names"
   tags: dashboard

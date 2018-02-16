@@ -99,12 +99,6 @@ Create a playbook with the following content:
     k8s_version: 1.9.0
     # Local location to store generated certificates 
     k8s_certs_src: ../certs
-    # Public DNS used as suffix for ingress rules
-    k8s_public_dns: example.org
-    # Users that can access the dashboards 
-    k8s_basic_auth_users:
-    - name: admin
-      password: admin
 ```
 
 Docker
@@ -201,9 +195,6 @@ Installs kube-dns as Deployment.
 
 #### heapster
 Installs heapster in standalone mode as Deployment.
-
-#### basic-auth
-Installs basic-auth secret which is used for basic authentication for Dashboard and Traefik.
 
 #### dashboard
 Installs Kubernetes dashboard
