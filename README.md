@@ -133,7 +133,8 @@ And prepend the role to the playbook:
 Bootstrap token
 ---------------
 
-A bootstrap token is required to for kubelet to join the cluster.
+A bootstrap token can be used for kubelet to join the cluster.
+With a bootstrap token a bootstrap.kubeconfig is used the first time to request a new certificate.
 
 The following command will generate the values `k8s_token_id` and `k8s_token_secret` variables
 that you will need to add to your playbook or vars file.

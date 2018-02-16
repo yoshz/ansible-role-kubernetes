@@ -36,7 +36,7 @@
   tags: kube-scheduler
 
 - import_tasks: bootstrap-token.yml
-  when: "'k8s-master' in group_names"
+  when: "k8s_token_id and 'k8s-master' in group_names"
   tags: bootstrap-token
 
 - import_tasks: cni.yml
