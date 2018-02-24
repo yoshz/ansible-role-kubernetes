@@ -197,7 +197,7 @@ ETCDCTL_API=3 etcdctl member list
 If the cluster is already initialized and you want to add additional members run:
 Make sure you add one member at a time.
 ```bash
-ETCDCTL_API=3 etcdctl member add <node> --peer-urls=https://<ip>:2380 --endpoints=https://<ip>:2380
+ETCDCTL_API=3 etcdctl member add <node> --peer-urls=https://<ip>:2380
 ```
 
 
