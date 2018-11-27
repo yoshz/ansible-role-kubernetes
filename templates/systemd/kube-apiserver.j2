@@ -26,7 +26,6 @@ ExecStart=/usr/local/bin/kube-apiserver \
     --service-account-key-file={{ k8s_certs_dst }}/server.key \
     --service-cluster-ip-range={{ k8s_service_subnet }} \
     --secure-port=6443 \
-    --tls-ca-file={{ k8s_certs_dst }}/ca.crt \
     --tls-cert-file={{ k8s_certs_dst }}/server.crt \
     --tls-private-key-file={{ k8s_certs_dst }}/server.key \
     --v=1
